@@ -27,10 +27,24 @@ foreach($json['items'] as $item) {
   $url2 = "https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId=" . $pid . '&key=[INPUT_KEY_HERE]';
   $content2 = file_get_contents_curl($url2);
   $json2 = json_decode($content2, true);
-  foreach($json2['items'] as $item2) {
-    array_push($items, $item2['contentDetails']['videoId']);
-}
-}
+
+  $total = $json2['pageInfo']['totalResults'] / $json2['pageInfo']['resultsPerPage'];
+  $token="";
+  for ($i = 0; $i < $total; $i++) {
+      $url_token = "https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId=" . $pid . "&key=[INPUT_KEY_HERE]&pageToken=" . $token;
+      $content_token = file_get_contents_curl($url_token);
+      $json_token = json_decode($content_token, true);
+      foreach($json_token['items'] as $item2) {
+        array_push($items, $item2['contentDetails']['videoId']);
+      }
+      if(isset($json2['nextPageToken']))
+      {
+      $token = $json2['nextPageToken'];
+      }
+
+    }
+  }
+  
 $rand_key = array_rand($items, 1);
 
 //echo 'bash ' . __DIR__ . '/get_frame.sh http://www.youtube.com/watch?v=' . $items[$rand_key];
